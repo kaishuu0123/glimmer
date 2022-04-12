@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package glimmer
@@ -7,18 +8,21 @@ import "github.com/hajimehoshi/oto"
 type audioOutput struct {
 	ab *AudioBuffer
 
+	ctx    *oto.Context
 	player *oto.Player
 }
 
 func (ao *audioOutput) init(ab *AudioBuffer) error {
-	player, err := oto.NewPlayer(
+	ctx, err := oto.NewContext(
 		int(ab.SamplesPerSecond),
 		int(ab.ChannelCount),
 		int(ab.BitsPerSample/8),
 		int(ab.BlockSize))
 	if err != nil {
-		return err
+		panic(err)
 	}
+	player := ctx.NewPlayer()
+	ao.ctx = ctx
 	ao.player = player
 	ao.ab = ab
 	return nil
